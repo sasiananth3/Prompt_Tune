@@ -107,7 +107,7 @@ with st.sidebar:
 
     with st.expander("⚙️ Generation Parameters"):
         temperature = st.slider("Temperature", 0.0, 1.0, 0.7, 0.05)
-        max_tokens = st.slider("Max Tokens", 256, 3000, 1500, 100)
+        max_tokens = st.slider("Max Tokens", 256, 4096, 2500, 128, help="Higher token limit prevents code from getting truncated prematurely.")
 
     st.divider()
 

@@ -101,13 +101,40 @@ class OpenRouterClient:
 
             if response.status_code == 200:
                 data = response.json()
-                choice = data.get("choices", [{}])[0]
-                content = choice.get("message", {}).get("content", "")
+                choices = data.get("choices", [])
+                if not choices:
+                    return {
+                        "success": False,
+                        "error": "The model returned an empty response. This happens when the free endpoint is temporarily overloaded. Please retry or pick a different model from the sidebar.",
+                        "output": ""
+                    }
+                choice = choices[0]
+                message = choice.get("message", {})
+                content = message.get("content") or ""
+                reasoning = message.get("reasoning") or ""
+                finish_reason = choice.get("finish_reason")
+
+                # If content is empty/None but reasoning exists (e.g. reasoning models like DeepSeek-R1)
+                if not content.strip() and reasoning.strip():
+                    content = reasoning.strip()
+
+                if not content.strip():
+                    return {
+                        "success": False,
+                        "error": "Model finished without generating readable text (upstream endpoint returned empty output). Try increasing Max Tokens or selecting a different free model from the sidebar.",
+                        "output": ""
+                    }
+
+                # Warn user if output was cut off prematurely
+                if finish_reason == "length":
+                    content += "\n\n---\n> ⚠️ **Output Truncated:** The model reached the `Max Tokens` limit before finishing. Expand **⚙️ Generation Parameters** in the sidebar and increase **Max Tokens** (e.g. to 3000+) to get the complete output."
+
                 return {
                     "success": True,
                     "output": content,
                     "usage": data.get("usage", {}),
-                    "model_used": data.get("model", model)
+                    "model_used": data.get("model", model),
+                    "finish_reason": finish_reason
                 }
             else:
                 try:

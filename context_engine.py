@@ -10,14 +10,14 @@ DEFAULT_KNOWLEDGE_BASE = [
     {
         "id": "code_standards",
         "category": "Software Engineering",
-        "title": "Python Best Practices & Standards",
+        "title": "Software Engineering & Clean Code Standards",
         "content": (
-            "1. Always include type hints for function signatures.\n"
-            "2. Wrap critical operations in try-except blocks with explicit error logging.\n"
-            "3. Include docstrings explaining parameters, return types, and exceptions.\n"
-            "4. Follow PEP 8 style guidelines."
+            "1. Produce complete, executable code without leaving placeholders or unfinished logic.\n"
+            "2. Always include meaningful comments and edge-case handling (e.g. null/empty checks, boundary values).\n"
+            "3. State Time and Space complexity (Big-O notation) clearly.\n"
+            "4. Follow idiomatic standards and naming conventions for the requested programming language."
         ),
-        "keywords": ["python", "code", "script", "function", "bug", "program", "csv", "api", "database"]
+        "keywords": ["python", "java", "javascript", "code", "script", "function", "bug", "program", "csv", "api", "database", "algorithm", "palindrome", "plaindrome"]
     },
     {
         "id": "support_policy",

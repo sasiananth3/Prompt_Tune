@@ -13,11 +13,17 @@ def infer_task_and_persona(user_input: str) -> Dict[str, str]:
     """
     text = user_input.lower()
 
-    if any(k in text for k in ["code", "script", "python", "function", "bug", "sql", "api", "csv", "regex"]):
+    code_keywords = [
+        "code", "script", "python", "java", "javascript", "typescript", "c++", "cpp", "c#",
+        "golang", "rust", "html", "css", "react", "sql", "php", "ruby", "swift", "kotlin",
+        "function", "class", "method", "bug", "api", "csv", "regex", "algorithm",
+        "palindrome", "plaindrome", "leetcode", "data structure", "array", "binary", "sorting"
+    ]
+    if any(k in text for k in code_keywords):
         return {
             "task": "Technical Implementation",
             "persona": "Principal Software Architect",
-            "format": "Clean code block with inline comments, followed by an explanation and test case.",
+            "format": "Clean, complete, fully working code block with inline comments, followed by brief complexity analysis and test cases.",
             "tone": "Technical, precise, and practical"
         }
     elif any(k in text for k in ["email", "marketing", "pitch", "copy", "newsletter", "blog"]):
