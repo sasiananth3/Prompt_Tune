@@ -1,0 +1,13 @@
+# Python environment
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+
+# Streamlit
+.streamlit/
+
+# OS files
+Thumbs.db
+.DS_Store
