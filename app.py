@@ -9,10 +9,14 @@ from dotenv import load_dotenv
 
 from context_engine import ContextEngine, DEFAULT_KNOWLEDGE_BASE
 from prompt_compiler import MasterPromptCompiler
-from llm_client import OpenRouterClient, POPULAR_FREE_MODELS
+from llm_client import OpenRouterClient, fetch_live_free_models, DEFAULT_FALLBACK_FREE_MODELS
 
 # Load local environment variables
 load_dotenv()
+
+@st.cache_data(ttl=600)
+def get_cached_free_models():
+    return fetch_live_free_models()
 
 st.set_page_config(
     page_title="Prompt_Tune | Prompt Optimization Pipeline",
@@ -90,11 +94,15 @@ with st.sidebar:
         help="Get a free key at https://openrouter.ai/keys"
     )
 
+    live_free_models = get_cached_free_models()
+    default_env_model = os.getenv("OPENROUTER_MODEL", "openrouter/free")
+    default_idx = live_free_models.index(default_env_model) if default_env_model in live_free_models else 0
+
     selected_model = st.selectbox(
         "Model (Free Tier)",
-        options=POPULAR_FREE_MODELS,
-        index=0,
-        help="Free models available on OpenRouter"
+        options=live_free_models,
+        index=default_idx,
+        help="Live free models fetched directly from OpenRouter API"
     )
 
     with st.expander("⚙️ Generation Parameters"):

@@ -1,21 +1,50 @@
 """
 LLM Client for OpenRouter
-Provides access to OpenRouter's free and commercial models using standard REST API.
+Provides access to OpenRouter's free models using standard REST API,
+with dynamic discovery of currently available free models.
 """
 import os
 import requests
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List, Optional
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
 
-POPULAR_FREE_MODELS = [
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "deepseek/deepseek-r1:free",
-    "google/gemini-2.0-flash-exp:free",
-    "qwen/qwen-2.5-coder-32b-instruct:free",
-    "mistralai/mistral-7b-instruct:free",
-    "meta-llama/llama-3.1-8b-instruct:free"
+DEFAULT_FALLBACK_FREE_MODELS = [
+    "openrouter/free",
+    "google/gemma-4-31b-it:free",
+    "qwen/qwen3.8-27b:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "cohere/north-mini-code:free"
 ]
+
+
+def fetch_live_free_models() -> List[str]:
+    """
+    Dynamically queries OpenRouter API to fetch all currently active free models.
+    """
+    try:
+        res = requests.get(OPENROUTER_MODELS_URL, timeout=8)
+        if res.status_code == 200:
+            data = res.json().get("data", [])
+            free_models = []
+            # Always put openrouter/free first if present
+            for m in data:
+                m_id = m.get("id", "")
+                pricing = m.get("pricing", {})
+                is_free = ":free" in m_id or (pricing.get("prompt") == "0" and pricing.get("completion") == "0")
+                if m_id == "openrouter/free":
+                    free_models.insert(0, m_id)
+                elif is_free:
+                    free_models.append(m_id)
+            if "openrouter/free" not in free_models:
+                free_models.insert(0, "openrouter/free")
+            if free_models:
+                return free_models
+    except Exception:
+        pass
+    return DEFAULT_FALLBACK_FREE_MODELS
 
 
 class OpenRouterClient:
@@ -28,7 +57,7 @@ class OpenRouterClient:
     def call_model(
         self,
         prompt: str,
-        model: str = "meta-llama/llama-3.3-70b-instruct:free",
+        model: str = "openrouter/free",
         system_instruction: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: int = 1500
